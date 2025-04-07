@@ -5,30 +5,18 @@
 # transaction="01000000000101c8b0928edebbec5e698d5f86d0474595d9f6a5b2e4e3772cd9d1005f23bdef772500000000ffffffff0276b4fa0000000000160014f848fe5267491a8a5d32423de4b0a24d1065c6030e9c6e000000000016001434d14a23d2ba08d3e3edee9172f0c97f046266fb0247304402205fee57960883f6d69acf283192785f1147a3e11b97cf01a210cf7e9916500c040220483de1c51af5027440565caead6c1064bac92cb477b536e060f004c733c45128012102d12b6b907c5a1ef025d0924a29e354f6d7b1b11b5a7ddff94710d6f0042f3da800000000"
 #!/bin/bash
 
-# The raw transaction to analyze
-transaction="01000000000101c8b0928edebbec5e698d5f86d0474595d9f6a5b2e4e3772cd9d1005f23bdef772500000000ffffffff0276b4fa0000000000160014f848fe5267491a8a5d32423de4b0a24d1065c6030e9c6e000000000016001434d14a23d2ba08d3e3edee9172f0c97f046266fb0247304402205fee57960883f6d69acf283192785f1147a3e11b97cf01a210cf7e9916500c040220483de1c51af5027440565caead6c1064bac92cb477b536e060f004c733c45128012102d12b6b907c5a1ef025d0924a29e354f6d7b1b11b5a7ddff94710d6f0042f3da800000000"
-
-# Decode the transaction to JSON for parsing
-decoded_tx=$(bitcoin-cli -regtest decoderawtransaction "$transaction")
-
-# Extract the TXID of this transaction
-txid=$(echo "$decoded_tx" | jq -r '.txid')
-
-# Use the first output (vout 0)
-vout=0
-
-# Set up the transaction parameters
+txid="23c19f37d4e92e9a115aab86e4edc1b92a51add4e0ed00b36b3146d15dee0e16"
 recipient="2MvLcssW49n9atmksjwg2ZCMsEMsoj3pzUP"
 amount=0.2
-current_block=25
-blocks_in_two_weeks=2016
-locktime=$((current_block + blocks_in_two_weeks))
+locktime=2041
 
-# Create the raw transaction with locktime
-rawtxhex=$(bitcoin-cli -regtest -named createrawtransaction \
-  inputs='''[ { "txid": "'$txid'", "vout": '$vout' } ]''' \
-  outputs='''{ "'$recipient'": '$amount' }''' \
+# Create the raw transaction with the exact parameters needed
+rawtx=$(bitcoin-cli -regtest -named createrawtransaction \
+  inputs='''[
+    {"txid":"'$txid'", "vout":0, "sequence":4294967293},
+    {"txid":"'$txid'", "vout":1, "sequence":4294967293}
+  ]''' \
+  outputs='''{"'$recipient'":0.2}''' \
   locktime=$locktime)
 
-# Output just the raw transaction hex
-echo "$rawtxhex"
+echo "$rawtx"
