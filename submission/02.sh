@@ -11,12 +11,10 @@ transaction="01000000000101c8b0928edebbec5e698d5f86d0474595d9f6a5b2e4e3772cd9d10
 # Decode the transaction to JSON for parsing
 decoded_tx=$(bitcoin-cli -regtest decoderawtransaction "$transaction")
 
-# Extract the TXID of this transaction (this will be our input UTXO's txid)
+# Extract the TXID of this transaction
 txid=$(echo "$decoded_tx" | jq -r '.txid')
 
-# Extract the vout information
-# Typically, we'd choose one of the vouts as our input
-# For this example, we'll use the first output (vout 0)
+# Use the first output (vout 0)
 vout=0
 
 # Set up the transaction parameters
@@ -26,18 +24,11 @@ current_block=25
 blocks_in_two_weeks=2016
 locktime=$((current_block + blocks_in_two_weeks))
 
-echo "Extracted UTXO information from the transaction:"
-echo "TXID: $txid"
-echo "Vout: $vout"
-
 # Create the raw transaction with locktime
 rawtxhex=$(bitcoin-cli -regtest -named createrawtransaction \
   inputs='''[ { "txid": "'$txid'", "vout": '$vout' } ]''' \
   outputs='''{ "'$recipient'": '$amount' }''' \
   locktime=$locktime)
 
-# Sign the transaction (this doesn't broadcast it)
-signedtx=$(bitcoin-cli -regtest -named signrawtransactionwithwallet hexstring=$rawtxhex | jq -r '.hex')
-
-
-echo $rawtxhex
+# Output just the raw transaction hex
+echo "$rawtxhex"
