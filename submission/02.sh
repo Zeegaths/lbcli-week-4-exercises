@@ -39,18 +39,5 @@ rawtxhex=$(bitcoin-cli -regtest -named createrawtransaction \
 # Sign the transaction (this doesn't broadcast it)
 signedtx=$(bitcoin-cli -regtest -named signrawtransactionwithwallet hexstring=$rawtxhex | jq -r '.hex')
 
-# Print information about the transaction
-echo "Created time-locked transaction:"
-echo "--------------------------------"
-echo "UTXO: $txid:$vout"
-echo "Recipient: $recipient"
-echo "Amount: $amount BTC (20,000,000 satoshis)"
-echo "Locktime: Block $locktime (2 weeks from current block $current_block)"
-echo
-echo "Raw transaction hex:"
+
 echo $rawtxhex
-echo
-echo "Signed transaction hex:"
-echo $signedtx
-echo
-echo "This transaction cannot be mined until block $locktime is reached."
